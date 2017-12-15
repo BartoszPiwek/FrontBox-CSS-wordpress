@@ -1,9 +1,16 @@
+<!--=======================================================================
+|| FILE: functions.php
+===========================================================================
+|| The functions file behaves like a WordPress Plugin, adding features and functionality to a WordPress site. You can use it to call functions, 
+|| both PHP and built-in WordPress, and to define your own functions. You can produce the same results by adding code to a WordPress Plugin or through the WordPress 
+|| Theme functions file.
+===========================================================================
+
 <?php
 
-//==================================================
-// Switch prod/dev
-// Include line in wp-config.php
-// define('DEV_ENV', true);
+/*=========================================================================
+|| Access to global variables "DEV_ENV" to switch assets version (prod/dev)
+=========================================================================*/
 global $wp;
 
 //==================================================
