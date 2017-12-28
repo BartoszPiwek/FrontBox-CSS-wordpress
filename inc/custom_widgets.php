@@ -24,12 +24,14 @@ register_sidebar( array(
 
 <?php
 
+add_theme_support( 'customize-selective-refresh-widgets' );
+
 function wordpress_widgets_init() {
 
 	// Add here
 
 }
 
-add_theme_support( 'customize-selective-refresh-widgets' );
+add_action( 'widgets_init', 'wordpress_widgets_init' );
 
 ?>

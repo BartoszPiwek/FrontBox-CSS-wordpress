@@ -38,7 +38,8 @@ require_once('inc/shortcodes/template-parts.php');
 require_once('inc/post_types.php');
 
 // Widgets
-require_once('inc/widgets.php');
+require_once('inc/custom_widgets.php'); // Base
+// require_once('inc/widgets/custom-widget.php'); 
 
 // Allow insert tags in widget title
 // Change <> to []
