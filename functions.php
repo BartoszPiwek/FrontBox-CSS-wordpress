@@ -44,25 +44,8 @@ require_once('inc/custom_wysiwyg.php');
 require_once('inc/custom_widgets.php'); // Base
 // require_once('inc/widgets/custom-widget.php'); 
 
-// Allow insert tags in widget title
-// Change <> to []
-function html_widget_title( $var) {
-	$var = (str_replace( '[', '<', $var ));
-	$var = (str_replace( ']', '>', $var ));
-	return $var ;
-
-}
-add_filter( 'widget_title', 'html_widget_title' );
-
-// Support
-add_theme_support( 'custom-logo', array(
-	'height'      => 53,
-	'width'       => 113,
-	'flex-height' => true,
-	'flex-width'  => true,
-	'header-text' => array( 'site-title', 'site-header', 'site-description' ),
-) );
-add_theme_support( 'post-thumbnails' );
+// Walkers
+require_once('inc/walkers/walker_nav_menu.php');
 
 //==================================================
 // Register menu
@@ -128,40 +111,26 @@ if (!DEV_ENV) {
 // Remove meta wordpress version
 remove_action('wp_head', 'wp_generator');
 
-function wordpress_setup() {
+//==================================================
+// Change wordpress behawiors
 
-	load_theme_textdomain( 'blik' );
-	add_theme_support( 'title-tag' );
-	add_action( 'widgets_init', 'wordpress_widgets_init' );
-	$starter_content = array(
-		'widgets' => array(
-
-//===== Footer widgets
-			// Site map
-			'sidebar-2' => array(
-				'text_about',
-				'search',
-			),
-
-			// Contact
-			'sidebar-3' => array(
-				'text_about',
-				'search',
-			),
-
-			// Newsletter
-			'sidebar-4' => array(
-				'text_about',
-				'search',
-			),
-		)
-	);
-
-	$starter_content = apply_filters( 'wordpress_starter_content', $starter_content );
-	add_theme_support( 'starter-content', $starter_content );
-
+// Allow insert tags in widget title
+// Change <> to []
+function html_widget_title( $var) {
+	$var = (str_replace( '[', '<', $var ));
+	$var = (str_replace( ']', '>', $var ));
+	return $var ;
 }
-add_action( 'after_setup_theme', 'wordpress_setup' );
+add_filter( 'widget_title', 'html_widget_title' );
 
+// Allow insert page logo 
+add_theme_support( 'custom-logo', array(
+	'height'      => 53,
+	'width'       => 113,
+	'flex-height' => true,
+	'flex-width'  => true,
+	'header-text' => array( 'site-title', 'site-header', 'site-description' ),
+) );
+add_theme_support( 'post-thumbnails' );
 
 ?>
