@@ -94,6 +94,9 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
 	return $urls;
 }
 
+// Remove WISIWYG text wrap
+remove_filter( 'the_content', 'wpautop' );
+
 // Remove default post
 function remove_default_post_type() {
     remove_menu_page('edit.php');
