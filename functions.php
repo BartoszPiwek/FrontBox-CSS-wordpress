@@ -37,6 +37,9 @@ require_once('inc/shortcodes/template-parts.php');
 // Post types
 require_once('inc/post_types.php');
 
+// WYSIWYG addons
+require_once('inc/custom_wysiwyg.php');
+
 // Widgets
 require_once('inc/custom_widgets.php'); // Base
 // require_once('inc/widgets/custom-widget.php'); 
