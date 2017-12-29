@@ -107,7 +107,7 @@ function remove_admin_bar() {
 }
 
 // Remove comments on html file
-if (DEV_ENV) {
+if (!DEV_ENV) {
 	function callback($buffer) {
 		$buffer = preg_replace('/<!--(.|s)*?-->/', '', $buffer);
 		return $buffer;
