@@ -8,30 +8,24 @@
 
 <?php
 
-/*=========================================================================
-|| Access to global variables "DEV_ENV" to switch assets version (prod/dev)
-=========================================================================*/
-global $wp;
+/*==================================================
+// Switch prod/dev wordpress version
+==================================================*/
+global $version;
+$version = get_option('version');
 
-//==================================================
-// Include scripts/style in wordpress theme
-
-function init_scripts() {
-	wp_enqueue_style( 'style', get_stylesheet_uri() ); // Theme stylesheet
-	if ( DEV_ENV ) { // DEV version scripts
-		wp_enqueue_script( 'jquery-script', get_theme_file_uri( 'assets/js/libs/jquery.js' ), '1.0', true );
-		wp_enqueue_script( 'frontbox', get_theme_file_uri( 'assets/js/frontbox.js' ), array( 'jquery-script' ), '1.0', true );
-	} else { // PROD version scripts
-		wp_enqueue_script( 'main', get_theme_file_uri( 'assets/js/script.js' ), '1.0', true );
-	}
-}
-add_action( 'wp_enqueue_scripts', 'init_scripts' );
-
-//==================================================
+/*==================================================
 // Include files
+require_once('inc/.php');
+==================================================*/
+
+// Main
+require_once('settings/main.php');
+require_once('inc/walkers/navigation-menu.php');
+require_once('inc/menus.php');
+require_once('inc/widgets_panel.php');
 
 // Shortcodes
-require_once('inc/shortcodes/icons.php');
 require_once('inc/shortcodes/template-parts.php');
 
 // Post types
@@ -41,11 +35,50 @@ require_once('inc/post_types.php');
 require_once('inc/custom_wysiwyg.php');
 
 // Widgets
-require_once('inc/custom_widgets.php'); // Base
-// require_once('inc/widgets/custom-widget.php'); 
+
 
 // Walkers
-require_once('inc/walkers/walker_nav_menu.php');
+
+
+/*==================================================
+// Include scripts/style in wordpress theme 
+- https://developer.wordpress.org/reference/functions/wp_enqueue_script/
+- https://developer.wordpress.org/reference/functions/wp_enqueue_style/
+
+wp_enqueue_script( 'name', get_theme_file_uri( 'assets/js/name.js' ), array('jquery'), '1.0', true );
+wp_enqueue_style( 'style', get_stylesheet_uri() );
+==================================================*/
+
+function init_scripts() {
+	// Theme stylesheet
+	if ( !$version ) { 
+		// DEV version scripts
+		wp_enqueue_style( 'style', get_theme_file_uri( 'assets/css/style.css' ) );
+		wp_enqueue_script( 'jquery-script', get_theme_file_uri( 'assets/js/libs/jquery.js' ), array(), '1.0', true );
+		wp_enqueue_script( 'frontbox', get_theme_file_uri( 'assets/js/frontbox.js' ), array( 'jquery-script' ), '1.0', true );
+	} else { 
+		// PROD version scripts
+		wp_enqueue_style( 'style', get_theme_file_uri( 'assets/css/style.prod.css' ) );
+		wp_enqueue_script( 'main', get_theme_file_uri( 'assets/js/script.js' ), '1.0', true );
+	}
+}
+add_action( 'wp_enqueue_scripts', 'init_scripts' );
+
+
+/*==================================================
+// Images/SVG/Thumbnail
+==================================================*/
+
+//==================================================
+// OG Image
+// add_image_size( 'og-image', 600, 315, array( 'center', 'center'));
+// - name { string }
+// - width { number }
+// - height { number }
+// - position crop { array }
+add_image_size( 'og-image', 600, 315, array( 'center', 'center'));
+add_image_size( 'box-game', 1030, 580, array( 'center', 'center'));
+
 
 //==================================================
 // Register menu
@@ -54,8 +87,35 @@ register_nav_menus( array(
 	'main-menu'    => __( 'Main Menu', 'blik' ),
 ) );
 
-//==================================================
+/*==================================================
+// WYSIWYG
+==================================================*/
+
+// Replace text in get_content();
+function after_the_content($content) {
+	$stringToReplace = '';
+	$replaceTo = '';
+	$content = str_replace($stringToReplace,$replaceTo,$content);
+    return $content;
+}
+add_filter('the_content',  'after_the_content');
+
+// Add to WYSIWYG { required TinyMCE Advanced }
+function frontbox_wysiwyg_add($init) {
+	// Colors
+	$customColors = '
+        "e60012", "Red",
+	';
+	
+    $init['textcolor_map'] = '['.$custom_colors.']';
+	$init['textcolor_rows'] = 1;
+    return $init;
+}
+add_filter('tiny_mce_before_init', 'frontbox_wysiwyg_add');
+
+/*==================================================
 // Remove from default wordpress flow
+==================================================*/
 
 // Disable emoji's
 remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -77,23 +137,23 @@ function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
 	return $urls;
 }
 
-// Remove WISIWYG text wrap
-remove_filter( 'the_content', 'wpautop' );
+/* Remove text wrap in <p> tag */
+// remove_filter( 'the_content', 'wpautop' );
 
-// Remove default post
+/* Remove default post */
 function remove_default_post_type() {
     remove_menu_page('edit.php');
 }
 add_action('admin_menu','remove_default_post_type');
 
-// Remove admin bar
-add_action('after_setup_theme', 'remove_admin_bar');
-function remove_admin_bar() {
-  show_admin_bar(false);
-}
+/* Remove admin bar */
+// function remove_admin_bar() {
+//   show_admin_bar(false);
+// }
+// add_action('after_setup_theme', 'remove_admin_bar');
 
-// Remove comments on html file
-if (!DEV_ENV) {
+/* Remove comments on html file */
+if ($version) {
 	function callback($buffer) {
 		$buffer = preg_replace('/<!--(.|s)*?-->/', '', $buffer);
 		return $buffer;
@@ -111,11 +171,14 @@ if (!DEV_ENV) {
 // Remove meta wordpress version
 remove_action('wp_head', 'wp_generator');
 
-//==================================================
-// Change wordpress behawiors
+/*==================================================
+// Change/Add wordpress behaviors
+==================================================*/
 
-// Allow insert tags in widget title
-// Change <> to []
+/* 
+	Allow insert tags in widget title
+	change <> to [] 
+*/
 function html_widget_title( $var) {
 	$var = (str_replace( '[', '<', $var ));
 	$var = (str_replace( ']', '>', $var ));
@@ -123,7 +186,17 @@ function html_widget_title( $var) {
 }
 add_filter( 'widget_title', 'html_widget_title' );
 
-// Allow insert page logo 
+/* Add admin style */
+function frontbox_admin_css() {
+	echo '<style>' . file_get_contents( get_template_directory_uri() . '/assets/css/css_admin.css') . '</style>';
+}
+add_action('admin_head', 'frontbox_admin_css');
+
+/*==================================================
+// Add theme support
+==================================================*/
+
+/* Allow insert page logo */
 add_theme_support( 'custom-logo', array(
 	'height'      => 53,
 	'width'       => 113,
@@ -131,6 +204,22 @@ add_theme_support( 'custom-logo', array(
 	'flex-width'  => true,
 	'header-text' => array( 'site-title', 'site-header', 'site-description' ),
 ) );
+
+/* Allow add post thumbnails */
 add_theme_support( 'post-thumbnails' );
+
+/*==================================================
+// Addon functions
+==================================================*/
+
+/* Insert type post icon */
+function postTypeIcon($name) {
+	return get_theme_file_uri( 'inc/icons/' . $name . '.png' );
+}
+
+/* Insert icon */
+function add_icon($icon) {
+	echo file_get_contents( get_template_directory_uri() . '/assets/images/svg/' . $icon . '.svg');
+};
 
 ?>

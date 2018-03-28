@@ -1,7 +1,23 @@
-<?php get_header(); ?>
+<?php get_header();
 
-<main>
+include("template-parts/navigation.php");
 
-</main>
+if ( have_posts() ) {
+    while ( have_posts() ) {
+        the_post(); 
+        ?>
 
-<?php get_footer(); ?>
+            <main class="main">
+                <section class="section">
+                    <div class="wysiwyg">
+                        <?php the_content(); ?>
+                    </div>
+                </section>
+            </main>
+
+        <?php
+    }
+}
+        
+
+get_footer(); ?>

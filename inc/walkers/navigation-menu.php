@@ -3,34 +3,13 @@
 || FILE: walker_nav_menu.php
 ===========================================================================
 || Core class used to implement an HTML list of nav menu items.
-===========================================================================
-|| Item template:
-||
-
-||
-||
 ==========================================================================*/
 
-class Main_Menu_Walker extends Walker_Nav_Menu
+class NAV_MENU extends Walker_Nav_Menu
 {
     function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 )
     {
-        $classes     = empty ( $item->classes ) ? array () : (array) $item->classes;
-
-        $class_names = join(
-            ' '
-        ,   apply_filters(
-                'nav_menu_css_class'
-            ,   array_filter( $classes ), $item
-            )
-        );
- 
-        ! empty ( $class_names )
-            and $class_names = ' class="item '. esc_attr( $class_names ) . '"';
-
-        $output .= "<li id='menu-item-$item->ID' $class_names>";
-
-        $attributes  = '';
+        $attributes  = 'class="nav__item"';
 
         ! empty( $item->attr_title )
             and $attributes .= ' title="'  . esc_attr( $item->attr_title ) .'"';
@@ -41,21 +20,12 @@ class Main_Menu_Walker extends Walker_Nav_Menu
         ! empty( $item->url )
             and $attributes .= ' href="'   . esc_attr( $item->url        ) .'"';
 
-        // insert description for top level elements only
-        // you may change this
-        $description = ( ! empty ( $item->description ) and 0 == $depth )
-            ? '<small class="nav_desc">' . esc_attr( $item->description ) . '</small>' : '';
-
         $title = apply_filters( 'the_title', $item->title, $item->ID );
 
-        $item_output = $args->before
-            . "<a $attributes>"
-            . $args->link_before
+        $item_output = 
+            "<a $attributes>"
             . $title
-            . '</a> '
-            . $args->link_after
-            . $description
-            . $args->after;
+            . "</a>";
 
         // Since $output is called by reference we don't need to return anything.
         $output .= apply_filters(

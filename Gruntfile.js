@@ -4,7 +4,7 @@ Addon:       FrontBox-WordPress 1.0.0 (github.com/BartoszPiwek/FrontBox-WordPres
 Author:      Bartosz Piwek
 ********************************************************************/
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 
   'use strict';
 
@@ -19,6 +19,16 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-css-statistics');
   grunt.loadNpmTasks('grunt-html');
   grunt.loadNpmTasks('grunt-preprocess');
+  grunt.loadNpmTasks('grunt-zip');
+  grunt.loadNpmTasks('grunt-combine-media-queries');
+
+  //=========================================================================
+  // Settings
+
+  var html_variables = grunt.file.readJSON('settings/variables_html.json');
+
+  // END Settings
+  //=========================================================================
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -48,33 +58,64 @@ module.exports = function(grunt) {
     },
 
     // Concat
-concat: {
-  prod: {
-    src: [
-        'src/js/libs/jquery.js',
-        'src/js/libs/slick.js',
-        'src/js/libs/jquery-modal-video.js',
-        'src/js/libs/jquery.mask.js',
-        'src/js/libs/jquery-validator.js',
-        'src/js/libs/jquery.inputmask.bundle.js',
-        'src/js/frontbox.js',
-    ],
-    dest: 'assets/js/script.js',
-  }
-},
-
-uglify: {
-  prod: {
-    options: {
-      warnings: false,
-      drop_console: true,
-      drop_debugger: true
+    concat: {
+      prod: {
+        src: [
+          'src/js/libs/jquery.js',
+          'src/js/libs/slick.min.js',
+          'src/js/libs/youtube.min.js',
+          'src/js/libs/cookies.min.js',
+          'src/js/libs/featherlight.min.js',
+          'assets/js/frontbox.prod.js',
+        ],
+        dest: 'assets/js/script.prod.js',
+      }
     },
-    files: {
-      'assets/js/script.js': ['assets/js/script.js']
-    }
-  },
-},
+
+    //===== Process
+
+    // Preprocess project
+    preprocess: {
+
+      // Frontbox scripts
+      dev_frontbox: {
+        src: ['assets/js/frontbox.js'],
+        options: {
+          inline: true,
+        }
+      },
+      prod_frontbox: {
+        src: ['assets/js/frontbox.js'],
+        options: {
+          inline: true,
+        }
+      }
+    },
+
+    //  Uglify JS
+    uglify: {
+      options: {
+        preserveComments: false,
+        drop_console: true,
+      },
+      prod: {
+        files: {
+          'assets/js/script.prod.js': 'assets/js/script.prod.js'
+        }
+      },
+    },
+
+    babel: {
+      options: {
+        sourceMap: false,
+        presets: ['env']
+      },
+      dist: {
+        files: {
+          'assets/js/frontbox.prod.js': 'assets/js/frontbox.js'
+        }
+      }
+    },
 
 
     //===== COPY process (files to dev / prod folder)
@@ -104,9 +145,35 @@ uglify: {
             expand: true,
             cwd: 'src/js/',
             src: ['**', 'libs/*js'],
-            dest:  'assets/js/',
+            dest: 'assets/js/',
             filter: 'isFile',
           },
+          // sound
+          {
+            expand: true,
+            cwd: 'src/sound/',
+            src: ['**'],
+            dest: 'assets/sound/',
+            filter: 'isFile',
+          },
+        ]
+      },
+      // Frontbox scripts
+      dev_frontbox: {
+        files: [{
+          expand: true,
+          cwd: 'src/js/frontbox/',
+          src: ['*.js'],
+          dest: 'assets/js/frontbox/',
+          filter: 'isFile'
+        },
+        {
+          expand: true,
+          cwd: 'src/js/',
+          src: ['frontbox.js'],
+          dest: 'assets/js/',
+          filter: 'isFile'
+        },
         ]
       },
     },
@@ -143,39 +210,32 @@ uglify: {
     //===== Images Process
 
     // Images optimization
-    imageoptim: {
-      options: {
-        quitAfter: true
-      },
-      png: {
+    image: {
+      dynamic: {
         options: {
-          imageAlpha: true,
-          jpegMini: false
+          svgo: true,
+          zopflipng: ['-y'],
         },
-        src: [
-          'public/prod/images/**/*.png'
-        ]
-      },
-      jpg: {
-        options: {
-          imageAlpha: false,
-          jpegMini: false
-        },
-        src: [
-          'public/prod/images/**/*.jpg'
-        ]
+        files: [{
+          expand: true,
+          cwd: 'public/prod/images/',
+          src: ['**/*.{png,jpg,gif,svg}'],
+          dest: 'public/prod/images/',
+          filter: 'isFile'
+        }]
       }
     },
 
     // Spritesmith
+    // Normal and retina images must be in the same folder
     sprite: {
-      logos: {
-        src: 'src/images/sprite/logos/*.png',
-        dest: 'src/images/sprite-logo.png',
-        destCss: 'src/less/automatic/sprite-logo.less',
-        cssTemplate: 'grunt_files/sprite_syntax_responsive.less',
-        imgPath: '@spriteLogoPath',
-        padding: 15,
+      icons: {
+        src: 'src/images/sprites/icons/*.png',
+        dest: 'src/images/sprite-icon.png',
+        destCss: 'src/less/automatic/_sprite-icon.less',
+        cssTemplate: 'settings/spriteSyntax.less',
+        imgPath: '@spriteBannersPath',
+        padding: 2,
         algorithmOpts: {
           sort: false
         },
@@ -185,8 +245,8 @@ uglify: {
             return '.' + item.name;
           }
         },
-        // retinaSrcFilter: ['src/images/sprites/icons/2x/*@2x.png'],
-        // retinaDest: 'src/images/2x/sprites-banners.png'
+        retinaSrcFilter: ['src/images/sprites/icons/*@2x.png'],
+        retinaDest: 'src/images/2x/sprites-banners.png'
       },
     },
 
@@ -200,8 +260,8 @@ uglify: {
         windowsTile: true,
         tileBlackWhite: false,
         tileColor: "auto",
-        html: 'src/template/includes/favicon.html',
-        HTMLPrefix: "/images/favicon/"
+        html: 'template-parts/favicon.php',
+        HTMLPrefix: "<?php echo $url; ?>/assets/images/favicon/"
       },
       icons: {
         src: 'src/images/favicon.png',
@@ -245,7 +305,12 @@ uglify: {
           sourceMapFilename: 'style.css.map',
           sourceMapURL: 'style.css.map',
           sourceMapBasepath: '',
-          sourceMapRootpath: '/'
+          sourceMapRootpath: '/',
+          customFunctions: {
+            'version': function() {
+              return true;
+            },
+          }
         },
         files: {
           'style.css': "src/less/style.less"
@@ -253,11 +318,16 @@ uglify: {
       },
       prod: {
         options: {
-          compress: false,
-          sourceMap: false
+          compress: true,
+          sourceMap: false,
+          customFunctions: {
+            'version': function() {
+              return false;
+            },
+          }
         },
         files: {
-          'style.css': "src/less/style.less"
+          'style.prod.css': "src/less/style.less"
         }
       }
     },
@@ -282,7 +352,7 @@ uglify: {
           ],
           map: false
         },
-        src: 'style.css',
+        src: 'style.prod.css',
       },
       min: {
         options: {
@@ -294,7 +364,7 @@ uglify: {
           ],
           map: false
         },
-        src: 'style.css',
+        src: 'style.prod.css',
       }
     },
 
@@ -313,6 +383,21 @@ uglify: {
     },
 
     //===== Addon
+
+    // Audo create LESS class
+    autoclass: {
+      files: {
+        expand: true,
+        cwd: '',
+        src: ['*/**.php'],
+        flatten: true,
+      },
+      options: {
+        dest: "src/less/automatic/_automatic.less",
+        destResponsive: "src/less/automatic/_responsive.less",
+        database: "settings/plugin_autoclass.json"
+      }
+    },
 
 
     // Tests
@@ -348,8 +433,8 @@ uglify: {
     // Cleaning
     clean: {
       options: {
-    'force': true
-  },
+        'force': true
+      },
       begin: [''],
       end: [
         'critical*.css',
@@ -389,6 +474,19 @@ uglify: {
     //   }
     // },
 
+    // grunt-combine-media-queries - Combine matching media queries into one media query definition
+    cmq: {
+      options: {
+        log: true
+      },
+      your_target: {
+        files: [{
+          src: 'style.prod.css',
+          dest: 'style.prod.css',
+        }]
+      }
+    },
+
     //===== Watch
 
     // Watch files
@@ -411,7 +509,7 @@ uglify: {
       },
       js: {
         files: ['src/js/**/*.js'],
-        tasks: ['newer:copy:dev'],
+        tasks: ['copy:dev', 'preprocess:dev_frontbox'],
       },
       valid: {
         files: ['src/template/**/*.html'],
@@ -439,9 +537,37 @@ uglify: {
   grunt.registerTask('up_prod', ['connect:prod:keepalive']);
 
   // Main tasks
-  grunt.registerTask('dev', ['copy:dev', 'less:dev', 'svgmin', 'concurrent:dev_watch']);
-  grunt.registerTask('prod', ['copy:dev', 'less:prod', 'concat', 'uglify', 'svgmin', 'postcss:prod',
- 'postcss:min']);
+  grunt.registerTask('dev', [
+    'newer:copy:dev',
+    'copy:dev_frontbox',
+    'autoclass',
+    'less:dev',
+    'svgmin',
+    'preprocess:dev_frontbox',
+    'concurrent:dev_watch'
+  ]);
+  grunt.registerTask('prod', [
+
+    // Images
+    'favicon',
+    'image',
+    'svgmin',
+
+    'copy:dev',
+    'preprocess:prod_frontbox',
+
+    // CSS
+    'autoclass',
+    'less:prod',
+    'cmq',
+    'postcss:prod',
+    'postcss:min',
+
+    // JavaScript
+    'babel',
+    'concat',
+    'uglify',
+  ]);
 
   // Images tasks
   grunt.registerTask('images', ['sprite', 'imageoptim']);
@@ -451,11 +577,5 @@ uglify: {
   // Style tasks
   grunt.registerTask('colors', ['autocolor']);
 
-  // Addon tasks
-  grunt.registerTask('hash', ['hash_res']);
-  grunt.registerTask('bower', ['bowercopy']);
-
-  // Valid tasks
-  grunt.registerTask('valid', ['clean:dev', 'processhtml:dev', 'htmllint:html', 'open:valid', 'watch:valid']);
-  grunt.registerTask('prod_valid', ['processhtml:prod', 'htmllint:prod_html', 'open:prod_valid']);
+  grunt.registerTask('favicon', ['favicons']);
 };
