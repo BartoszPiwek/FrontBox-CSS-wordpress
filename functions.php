@@ -1,9 +1,11 @@
 <!--=======================================================================
 || FILE: functions.php
 ===========================================================================
-|| The functions file behaves like a WordPress Plugin, adding features and functionality to a WordPress site. You can use it to call functions, 
-|| both PHP and built-in WordPress, and to define your own functions. You can produce the same results by adding code to a WordPress Plugin or through the WordPress 
-|| Theme functions file.
+|| The functions file behaves like a WordPress Plugin, adding features and 
+|| functionality to a WordPress site. You can use it to call functions, 
+|| both PHP and built-in WordPress, and to define your own functions. You 
+|| can produce the same results by adding code to a WordPress Plugin or 
+|| through the WordPress Theme functions file.
 ===========================================================================
 
 <?php
@@ -11,33 +13,32 @@
 /*==================================================
 // Switch prod/dev wordpress version
 ==================================================*/
+
 global $version;
 $version = get_option('version');
 
 /*==================================================
 // Include files
-require_once('inc/.php');
 ==================================================*/
 
-// Main
-require_once('settings/main.php');
-require_once('inc/walkers/navigation-menu.php');
-require_once('inc/menus.php');
-require_once('inc/widgets_panel.php');
-
-// Shortcodes
-require_once('inc/shortcodes/template-parts.php');
-
-// Post types
-require_once('inc/post_types.php');
-
-// WYSIWYG addons
-require_once('inc/custom_wysiwyg.php');
-
-// Widgets
-
-
-// Walkers
+$frontbox_required = [
+	// Main
+	'settings/main.php',
+	'inc/walkers/navigation-menu.php',
+	'inc/menus.php',
+	'inc/widgets_panel.php',
+	// Shortcodes
+	'inc/shortcodes/template-parts.php',
+	// Post types
+	'inc/post_types.php',
+	// WYSIWYG addons
+	'inc/custom_wysiwyg.php',
+];
+  
+foreach ($frontbox_required as $file) {
+	require_once $filepath;
+}
+unset($file, $frontbox_required);
 
 
 /*==================================================
