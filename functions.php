@@ -21,24 +21,22 @@ $version = get_option('version');
 // Include files
 ==================================================*/
 
-$frontbox_required = [
+$frontbox_required = array(
+	// Walkers
+	'/inc/walkers/navigation-menu.php',
 	// Main
-	'settings/main.php',
-	'inc/walkers/navigation-menu.php',
-	'inc/menus.php',
-	'inc/widgets_panel.php',
+	'/settings/main.php',
+	'/inc/menus.php',
+	'/inc/widgets_panel.php',
 	// Shortcodes
-	'inc/shortcodes/template-parts.php',
+	'/inc/shortcodes/template-parts.php',
 	// Post types
-	'inc/post_types.php',
+	'/inc/post_types.php',
 	// WYSIWYG addons
-	'inc/custom_wysiwyg.php',
-];
-  
-foreach ($frontbox_required as $file) {
-	require_once $filepath;
-}
-unset($file, $frontbox_required);
+	'/inc/custom_wysiwyg.php',
+);
+locate_template( $frontbox_required, true, true );
+
 
 
 /*==================================================
@@ -85,7 +83,7 @@ add_image_size( 'box-game', 1030, 580, array( 'center', 'center'));
 // Register menu
 
 register_nav_menus( array(
-	'main-menu'    => __( 'Main Menu', 'blik' ),
+	'main-menu'    => 'Main Menu',
 ) );
 
 /*==================================================
