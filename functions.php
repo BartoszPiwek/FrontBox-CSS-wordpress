@@ -181,7 +181,7 @@ function svg($icon, $class = '') {
 // Register menu
 
 register_nav_menus( array(
-	'main-menu'    => __( 'Main Menu', 'blik' ),
+	'main-menu'    => 'Main Menu',
 ) );
 
 /*==================================================
