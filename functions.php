@@ -1,9 +1,11 @@
 <!--=======================================================================
 || FILE: functions.php
 ===========================================================================
-|| The functions file behaves like a WordPress Plugin, adding features and functionality to a WordPress site. You can use it to call functions, 
-|| both PHP and built-in WordPress, and to define your own functions. You can produce the same results by adding code to a WordPress Plugin or through the WordPress 
-|| Theme functions file.
+|| The functions file behaves like a WordPress Plugin, adding features and 
+|| functionality to a WordPress site. You can use it to call functions, 
+|| both PHP and built-in WordPress, and to define your own functions. You 
+|| can produce the same results by adding code to a WordPress Plugin or 
+|| through the WordPress Theme functions file.
 ===========================================================================
 
 <?php
@@ -11,34 +13,44 @@
 /*==================================================
 // Switch prod/dev wordpress version
 ==================================================*/
+
 global $version;
 $version = get_option('version');
 
 /*==================================================
 // Include files
-require_once('inc/.php');
 ==================================================*/
 
-// Main
-require_once('settings/main.php');
-require_once('inc/walkers/navigation-menu.php');
-require_once('inc/menus.php');
-require_once('inc/widgets_panel.php');
+$frontbox_required = array(
+	'shortcodes/svg',
+	'shortcodes/list-we-do',
+	'post_types',
+	'posts/upload_media_javascript',
+	'posts/meta_description',
+	'posts/meta_keywords',
+	'posts/meta_subtitle',
+	'posts/meta_title',
+	'posts/page_button',
+	'posts/what-we-did',
+	'posts/class',
+	'posts/contact',
+	'posts/post',
+	'user_profile',
+	'widgets',
+	'walkers',
+	// Settings
+	'settings/theme',
+	'settings/functions',
+);
 
-// Shortcodes
-require_once('inc/shortcodes/template-parts.php');
+function frontbox_required_rewrite($string) {
+	return 'inc/' . $string . '.php';
+};
+$frontbox_required = array_map('frontbox_required_rewrite', $frontbox_required);
 
-// Post types
-require_once('inc/post_types.php');
-
-// WYSIWYG addons
-require_once('inc/custom_wysiwyg.php');
-
-// Widgets
-
-
-// Walkers
-
+foreach ($frontbox_required as $value) {
+	require_once($value);
+}
 
 /*==================================================
 // Include scripts/style in wordpress theme 
@@ -50,34 +62,119 @@ wp_enqueue_style( 'style', get_stylesheet_uri() );
 ==================================================*/
 
 function init_scripts() {
-	// Theme stylesheet
-	if ( !$version ) { 
-		// DEV version scripts
-		wp_enqueue_style( 'style', get_theme_file_uri( 'assets/css/style.css' ) );
-		wp_enqueue_script( 'jquery-script', get_theme_file_uri( 'assets/js/libs/jquery.js' ), array(), '1.0', true );
-		wp_enqueue_script( 'frontbox', get_theme_file_uri( 'assets/js/frontbox.js' ), array( 'jquery-script' ), '1.0', true );
+	global $version;
+
+	$frontbox_scripts = file_get_contents( get_theme_file_uri( 'settings/js_libs.json' ) );
+	$frontbox_scripts = json_decode($frontbox_scripts, true);
+
+	/**
+	 * Development version
+	 */
+	if ( !$version ) {
+
+		/* Style */
+		wp_enqueue_style( 'style', get_theme_file_uri( 'style.css' ) );
+
+		/* Scripts */
+		wp_enqueue_script('livereload', 'http://localhost:35729/livereload.js?snipver=1', null, false, false);
+
+		$count = count($frontbox_scripts['js_libs']);
+		for ($i=0; $i < $count; $i++) { 
+			wp_enqueue_script( "frontbox-script-lib-" . $i, get_theme_file_uri( "src" . $frontbox_scripts['js_libs'][$i] ), null, false, true );
+		}
+
+		wp_enqueue_script( "main", get_theme_file_uri( "assets/js/frontbox.js" ), null, false, true );
+
+	/**
+	 * Productive version
+	 */
 	} else { 
-		// PROD version scripts
-		wp_enqueue_style( 'style', get_theme_file_uri( 'assets/css/style.prod.css' ) );
-		wp_enqueue_script( 'main', get_theme_file_uri( 'assets/js/script.js' ), '1.0', true );
+
+		/* Style */
+		wp_enqueue_style( 'style', get_theme_file_uri( 'style.prod.css' ) );
+
+		/* Scripts */
+		wp_enqueue_script( "main", get_theme_file_uri( "assets/js/scripts.js" ), null, false, true );
+
 	}
+
+	/**
+	 * Pass ajax path to JS object
+	 */
+	wp_localize_script( 'main', 'ajax_object', array( 'ajaxurl' => admin_url( 'admin-ajax.php')));
+
 }
 add_action( 'wp_enqueue_scripts', 'init_scripts' );
-
 
 /*==================================================
 // Images/SVG/Thumbnail
 ==================================================*/
 
-//==================================================
-// OG Image
-// add_image_size( 'og-image', 600, 315, array( 'center', 'center'));
-// - name { string }
-// - width { number }
-// - height { number }
-// - position crop { array }
+/**
+ * Thumbnail images main
+ * add_image_size( 'og-image', 600, 315, array( 'center', 'center'));
+ * - name { string }
+ * - width { number }
+ * - height { number }
+ * - position crop { array 
+ */
+
 add_image_size( 'og-image', 600, 315, array( 'center', 'center'));
 add_image_size( 'box-game', 1030, 580, array( 'center', 'center'));
+
+/**
+ * Thumbnail images responsive
+ * for function responsive_image()
+ */
+add_image_size( '{name}-mobile', 251, 191, array( 'center', 'center'), true);
+add_image_size( '{name}-ptablet', 334, 254, array( 'center', 'center'), true);
+add_image_size( '{name}-desktop', 383, 289, array( 'center', 'center'), true);
+
+/**
+ * Return responsive tag img
+ */
+function responsive_image($name) {
+
+	global $post;
+	$thumbnailID = get_post_thumbnail_id($post->ID);
+
+	$title = get_the_title($post->ID);
+	$post_ID = $post->ID;
+
+	$size = array(
+		'mobile' => wp_get_attachment_image_src($thumbnailID, $name . '-mobile'),
+		'ptablet' => wp_get_attachment_image_src($thumbnailID, $name . '-ptablet'),
+		'desktop' => wp_get_attachment_image_src($thumbnailID, $name . '-desktop'),
+	);
+
+	return '
+		<img src="' . $size['mobile'][0] . '"
+     		 srcset="' . $size['desktop'][0] .' 1200w, ' . $size['ptablet'][0] .' 768w, ' . $size['mobile'][0] . ' 480w"
+     		 sizes="100vw"
+			 alt="' . get_the_title($post->ID) .'" 
+			 width="' . $size['desktop'][1] .'"
+			 height="' . $size['desktop'][2] . '"
+		/>
+	';
+}
+
+/**
+ * Return cockpit menu icon
+ */
+function frontbox_admin_menu_icon($name) {
+	return get_theme_file_uri( "inc/icons/" . $name . ".png");
+}
+
+/**
+ * Return svg icon with class
+ */
+function svg($icon, $class = '') {
+
+	$icon = file_get_contents( get_template_directory() . '/assets/images/svg/' . $icon . '.svg');
+	$icon = str_replace("<svg","<svg class='icon " . $class ."'",$icon);
+
+	return $icon;
+};
 
 
 //==================================================
@@ -212,14 +309,16 @@ add_theme_support( 'post-thumbnails' );
 // Addon functions
 ==================================================*/
 
-/* Insert type post icon */
-function postTypeIcon($name) {
-	return get_theme_file_uri( 'inc/icons/' . $name . '.png' );
+/**
+ * Return user avatar url
+ */
+function get_wp_user_avatar_url($user_ID) {
+	$string = get_wp_user_avatar($user_ID);
+    $pattern = '/src=[\'"]?([^\'" >]+)[\'" >]/';
+    preg_match($pattern, $string, $link);
+    $link = $link[1];
+    $link = urldecode($link);
+    return $link;
 }
-
-/* Insert icon */
-function add_icon($icon) {
-	echo file_get_contents( get_template_directory_uri() . '/assets/images/svg/' . $icon . '.svg');
-};
 
 ?>
