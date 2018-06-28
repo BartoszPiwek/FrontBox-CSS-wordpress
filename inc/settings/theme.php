@@ -17,10 +17,12 @@ function frontbox_register_settings() {
 
     $frontbox_register_settings = array(
         'version',
-	    'admin-bar',
 	    'contact-email',
 	    'contact-email-message-success',
-	    'contact-email-message-failed',
+		'contact-email-message-failed',
+		// Functions
+	    'admin-bar',
+		'comments',
     );
 
     foreach ($frontbox_required as $value) {
