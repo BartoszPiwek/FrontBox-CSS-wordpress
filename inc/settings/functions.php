@@ -11,7 +11,7 @@ if (!get_option('admin-bar')) {
 }
 
 /**
- * Remove comments
+ * Remove user comments
  */
 if (!get_option("comments")) {
 	function df_disable_comments_post_types_support() {

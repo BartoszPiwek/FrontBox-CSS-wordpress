@@ -22,9 +22,11 @@ $version = get_option('version');
 ==================================================*/
 
 $frontbox_required = array(
+	// Shortcodes
 	'shortcodes/svg',
 	'shortcodes/list-we-do',
-	'post_types',
+	'shortcodes/phone-number',
+	// Meta boxes
 	'posts/upload_media_javascript',
 	'posts/meta_description',
 	'posts/meta_keywords',
@@ -38,9 +40,10 @@ $frontbox_required = array(
 	'user_profile',
 	'widgets',
 	'walkers',
+	// Taxonymy & posts type
+	'post_types',
 	// Settings
-	'settings/theme',
-	'settings/functions',
+	'settings/_concat',
 );
 
 function frontbox_required_rewrite($string) {
@@ -272,10 +275,10 @@ remove_action('wp_head', 'wp_generator');
 // Change/Add wordpress behaviors
 ==================================================*/
 
-/* 
-	Allow insert tags in widget title
-	change <> to [] 
-*/
+/**
+ * Allow insert shortcodes in widget title
+ * - use <> instead []
+ */
 function html_widget_title( $var) {
 	$var = (str_replace( '[', '<', $var ));
 	$var = (str_replace( ']', '>', $var ));
@@ -283,7 +286,14 @@ function html_widget_title( $var) {
 }
 add_filter( 'widget_title', 'html_widget_title' );
 
-/* Add admin style */
+/**
+ * Run shortcodes in widgets
+ */
+add_filter( 'widget_text', 'do_shortcode' );
+
+/**
+ * Add admin style
+ */
 function frontbox_admin_css() {
 	echo '<style>' . file_get_contents( get_template_directory_uri() . '/assets/css/css_admin.css') . '</style>';
 }
