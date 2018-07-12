@@ -4,11 +4,13 @@
  * Include files 
  */
 $frontbox_required = array(
-	'settings/functions',
-	'settings/main',
-	'settings/forms',
+	'functions',
+	'advance',
+	'base',
+	'theme',
+	'forms',
 );
-frontbox_required($frontbox_required);
+frontbox_required($frontbox_required, 'inc/settings');
 
 /**
  * Register settings
@@ -32,6 +34,7 @@ function frontbox_settings_main() {
     add_menu_page('FrontBox Menu', 'FrontBox Menu', 'administrator', 'frontbox_menu', 'frontbox_settings_main_content', frontbox_admin_menu_icon("frontbox"));
 	add_submenu_page( 'frontbox_menu', 'Forms', 'Forms', 'administrator', 'frontbox_settings_forms_content', 'frontbox_settings_forms_content');
 	add_submenu_page( 'frontbox_menu', 'Base', 'Base', 'administrator', 'frontbox_settings_base_content', 'frontbox_settings_base_content');
+	add_submenu_page( 'frontbox_menu', 'Advance', 'Advance', 'administrator', 'frontbox_settings_advance_content', 'frontbox_settings_advance_content');
 }
 add_action('admin_menu', 'frontbox_settings_main');
 

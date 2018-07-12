@@ -1,0 +1,12 @@
+{
+   "javascript_tabs": true,
+   "javascript_burger_menu": true,
+   "javascript_toggle": true,
+   "javascript_header_drop_shadow": true,
+   "javascript_window_resize": true,
+   "javascript_burger_toggle": true,
+   "_comment": "Wordpress automatic check system (iOS, Android..) | Default false",
+   "check_system": false,
+   "rotate_text": true,
+   "spy_element": true
+ }

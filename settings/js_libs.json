@@ -1,0 +1,14 @@
+{
+  "js_libs": [
+    "/js/libs/jquery.js",
+    "/js/libs/validate.min.js",
+    "/js/libs/slick.min.js",
+    "/js/libs/js-cookies.js",
+    "/js/libs/sharer.min.js",
+    "/js/libs/TweenMax.js",
+    "/js/libs/particles.min.js"  
+  ],
+  "script": [
+    "/js/frontbox.js"
+  ]
+}

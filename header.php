@@ -51,8 +51,10 @@
 	
 	<?php
 		if( !has_site_icon() ) {
-			$url = get_template_directory_uri();
-			include("template-parts/favicon.php");
+			$template = 'template-parts/favicon.php';
+			if (file_exists($template)) {
+				include($template);
+			}
 		}
 	?>
 

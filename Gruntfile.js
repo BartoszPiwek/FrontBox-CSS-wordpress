@@ -313,7 +313,7 @@ module.exports = function (grunt) {
           }
         },
         files: {
-          'style.css': "src/less/style.less"
+          'style.dev.css': "src/less/style.less"
         }
       },
       prod: {

@@ -1,4 +1,5 @@
-<!--=======================================================================
+<?php
+/*========================================================================
 || FILE: functions.php
 ===========================================================================
 || The functions file behaves like a WordPress Plugin, adding features and 
@@ -8,7 +9,6 @@
 || through the WordPress Theme functions file.
 ===========================================================================
 
-<?php
 
 /*==================================================
 // Switch prod/dev wordpress version
@@ -24,36 +24,38 @@ $version = get_option('version');
 $frontbox_required = array(
 	// Shortcodes
 	'shortcodes/svg',
-	'shortcodes/list-we-do',
 	'shortcodes/phone-number',
 	// Meta boxes
-	'posts/upload_media_javascript',
-	'posts/meta_description',
-	'posts/meta_keywords',
-	'posts/meta_subtitle',
-	'posts/meta_title',
-	'posts/page_button',
-	'posts/what-we-did',
-	'posts/class',
-	'posts/contact',
-	'posts/post',
+	'meta_box/js_upload_media',
+	'meta_box/description',
+	'meta_box/keywords',
+	// 'meta_box/meta_subtitle',
+	'meta_box/title',
+	// 'meta_box/page_button',
+	// 'meta_box/class',
 	'user_profile',
-	'widgets',
-	'walkers',
+	// 'widgets',
+	// 'walkers',
 	// Taxonymy & posts type
-	'post_types',
+	// 'post_types',
 	// Settings
 	'settings/_concat',
 );
 
-function frontbox_required_rewrite($string) {
-	return 'inc/' . $string . '.php';
-};
-$frontbox_required = array_map('frontbox_required_rewrite', $frontbox_required);
+frontbox_required($frontbox_required);
 
-foreach ($frontbox_required as $value) {
-	require_once($value);
-}
+/**
+ * Libs
+ */
+
+$frontbox_required = array(
+	// Website screenshot tool based on PHP and PhantomJS
+	'screen-master/autoload',
+);
+
+frontbox_required($frontbox_required, '/libs');
+
+use Screen\Capture;
 
 /*==================================================
 // Include scripts/style in wordpress theme 
@@ -330,5 +332,52 @@ function get_wp_user_avatar_url($user_ID) {
     $link = urldecode($link);
     return $link;
 }
+
+/**
+ * Required
+ */
+function frontbox_required($array, $prefix = false) {
+
+	$theme_url = get_template_directory();
+
+	$prefix_pass = 'inc/';
+	if ($prefix) {
+		$prefix_pass = $prefix . '/';
+	}
+
+	foreach ($array as $value) {
+		require($theme_url . '/' .  $prefix_pass . $value . '.php');
+	}
+}
+
+/*==================================================
+// AJAX
+==================================================*/
+
+class frontbox_ajax_screenshot {
+        
+        /**
+         * @TODO Add class constructor description.
+         */
+        public function __construct() {
+            // ajax for logged in users
+            add_action( 'wp_ajax_frontbox_screnshot', array( $this, 'ajax_form_action' ) ); 
+            // ajax for not logged in users
+            add_action( 'wp_ajax_nopriv_frontbox_screnshot', array( $this, 'ajax_form_action') ); 
+        }
+                
+        /**
+         * Ajax Form action
+         */
+        public function ajax_form_action() { 
+			$screenCapture = new Capture($_SERVER[HTTP_HOST]);
+			$screenCapture->setImageType('png');
+			$screenCapture->setBackgroundColor('#FFFFFF');
+			$screenCapture->save( get_template_directory() . '/screenshot.png' );
+			return $screenCapture->getImageLocation();
+            die(); 
+        }
+    }
+$ajaxForm = new frontbox_ajax_screenshot();
 
 ?>

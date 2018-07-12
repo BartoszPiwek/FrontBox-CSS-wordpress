@@ -10,6 +10,7 @@ if ( have_posts() ) {
             <main class="main">
                 <section class="section">
                     <div class="wysiwyg">
+                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Culpa dignissimos vel ab officia eum voluptas aut magni autem qui ratione. Quidem ab iure sed quae architecto! Impedit saepe eius eveniet.
                         <?php the_content(); ?>
                     </div>
                 </section>
@@ -18,6 +19,5 @@ if ( have_posts() ) {
         <?php
     }
 }
-        
 
 get_footer(); ?>

@@ -1,0 +1,5 @@
+{
+    "exclude": [
+        "active", "on", "off", "collapse", "ignore", "toggle", "col"
+    ]
+}

@@ -30,7 +30,7 @@
                                 'menu_id' => false,
                                 'container_class' => 'nav',
                                 'container_id' => 'burger-menu',
-                                'walker'          => new NAV_MENU,
+                                // 'walker'          => new NAV_MENU,
                                 'depth'           => 1,
                                 'container' => '',
                                 'items_wrap' => '%3$s' 
