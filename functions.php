@@ -193,6 +193,15 @@ register_nav_menus( array(
 // WYSIWYG
 ==================================================*/
 
+// Wrap all img in <div> with img class 
+function the_content_wrap_img( $content ) {
+	$pattern = '/(<img class="([^"]*).*>)/i';
+	$replacement = '<div class="element_img $2">$1</div>';
+	$content = preg_replace( $pattern, $replacement, $content );
+	return $content;
+ }
+ add_filter( 'the_content', 'the_content_wrap_img' );
+
 // Replace text in get_content();
 function after_the_content($content) {
 	$stringToReplace = '';
