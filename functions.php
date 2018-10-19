@@ -59,11 +59,6 @@ use Screen\Capture;
 
 /*==================================================
 // Include scripts/style in wordpress theme 
-- https://developer.wordpress.org/reference/functions/wp_enqueue_script/
-- https://developer.wordpress.org/reference/functions/wp_enqueue_style/
-
-wp_enqueue_script( 'name', get_theme_file_uri( 'assets/js/name.js' ), array('jquery'), '1.0', true );
-wp_enqueue_style( 'style', get_stylesheet_uri() );
 ==================================================*/
 
 function init_scripts() {
@@ -75,39 +70,30 @@ function init_scripts() {
 	/**
 	 * Development version
 	 */
-	if ( !$version ) {
-
+	if ( !$version ) 
+	{
 		/* Style */
-		wp_enqueue_style( 'style', get_theme_file_uri( 'style.css' ) );
-
+		wp_enqueue_style( 'style', get_theme_file_uri( 'style.dev.css' ) );
 		/* Scripts */
-		wp_enqueue_script('livereload', 'http://localhost:35729/livereload.js?snipver=1', null, false, false);
-
-		$count = count($frontbox_scripts['js_libs']);
-		for ($i=0; $i < $count; $i++) { 
-			wp_enqueue_script( "frontbox-script-lib-" . $i, get_theme_file_uri( "src" . $frontbox_scripts['js_libs'][$i] ), null, false, true );
-		}
-
-		wp_enqueue_script( "main", get_theme_file_uri( "assets/js/frontbox.js" ), null, false, true );
-
+		wp_enqueue_script('livereload', 'http://localhost:35729/livereload.js', null, false, false);
+		wp_enqueue_script( 'app', get_theme_file_uri( "assets/js/app.dev.js" ), null, false, true );
+	} 
 	/**
 	 * Productive version
 	 */
-	} else { 
-
+	else 
+	{ 
 		/* Style */
 		wp_enqueue_style( 'style', get_theme_file_uri( 'style.prod.css' ) );
-
 		/* Scripts */
-		wp_enqueue_script( "main", get_theme_file_uri( "assets/js/scripts.js" ), null, false, true );
-
+		wp_enqueue_script( 'app', get_theme_file_uri( "assets/js/app.prod.js" ), null, false, true );
 	}
 
 	/**
-	 * Pass ajax path to JS object
+	 * Pass paths to JS
 	 */
-	wp_localize_script( 'main', 'ajax_object', array( 'ajaxurl' => admin_url( 'admin-ajax.php')));
-
+	wp_localize_script( 'app', 'wp', array( 'ajax' => admin_url( 'admin-ajax.php')));
+	wp_localize_script( 'app', 'wp', array( 'theme' => get_stylesheet_directory_uri()));
 }
 add_action( 'wp_enqueue_scripts', 'init_scripts' );
 
@@ -402,12 +388,19 @@ class frontbox_ajax_screenshot {
          * Ajax Form action
          */
         public function ajax_form_action() { 
+
 			$screenCapture = new Capture($_SERVER[HTTP_HOST]);
 			$screenCapture->setImageType('png');
 			$screenCapture->setBackgroundColor('#FFFFFF');
+			$screenCapture->setWidth(1200);
+			$screenCapture->setHeight(900);
+			$screenCapture->includeJs(new \Screen\Injection\Url('assets/js/app.dev.js'));
+			$screenCapture->setClipWidth(1200);
+			$screenCapture->setClipHeight(900);
 			$screenCapture->save( get_template_directory() . '/screenshot.png' );
 			return $screenCapture->getImageLocation();
-            die(); 
+	
+			die(); 
         }
     }
 $ajaxForm = new frontbox_ajax_screenshot();
