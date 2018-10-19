@@ -1,23 +1,28 @@
+</div> <!-- CLOSE Page content -->
+
 <footer class="footer">
     <div class="wrap">
         <?php dynamic_sidebar( 'Footer' ); ?>
     </div>
 </footer>
 
-<div id="js_overlay" class="overlay"></div>
+<div id="page-overlay" class="overlay"></div>
 
 <?php 
+    global $version;
+    if (!$version) 
+    {
+        ?>
+            <!-- Debug post -->
+                <div class="debug_vardump">
+                    <?php var_dump($post) ?>
+                </div>
+        <?php
+    }
+?>
 
-if (!$version) {
-    ?>
-        <div class="debug_vardump">
-            <?php var_dump($post) ?>
-        </div>  
-    <?php
-}
-
-wp_footer(); 
-
+<?php
+    wp_footer(); 
 ?>
 
 </body>

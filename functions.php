@@ -298,6 +298,29 @@ function html_widget_title( $var) {
 add_filter( 'widget_title', 'html_widget_title' );
 
 /**
+ * Hide the Archive Title Prefix in WordPress
+ */
+function hap_hide_the_archive_title( $title ) {
+	if ( is_rtl() ) {
+		return $title;
+	}
+	$title_parts = explode( ': ', $title, 2 );
+	if ( ! empty( $title_parts[1] ) ) {
+		$title = wp_kses(
+			$title_parts[1],
+			array(
+				'span' => array(
+					'class' => array(),
+				),
+			)
+		);
+		// $title = '<span class="screen-reader-text">' . esc_html( $title_parts[0] ) . ': </span>' . $title;
+	}
+	return $title;
+}
+add_filter( 'get_the_archive_title', 'hap_hide_the_archive_title' );
+
+/**
  * Run shortcodes in widgets
  */
 add_filter( 'widget_text', 'do_shortcode' );

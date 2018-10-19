@@ -5,7 +5,7 @@
 	<?php
 		global $version;
 		$post_id = $post->ID;
-		$page_title = get_the_title();
+		$googleTagManager = get_option('google-tag-manager');
 
 		if (has_post_thumbnail() && !is_front_page() &&!is_home()) {
 			$thumb_id = get_post_thumbnail_id();
@@ -25,6 +25,32 @@
 		}
 
 		$page_keywords = get_post_meta($post_id, "meta_keywords", true);
+	?>
+
+	<?php
+
+		/* Add Google Tag Manager code */
+		if ($googleTagManager) {
+			?>
+				<script>
+					(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $googleTagManager ?>');
+				</script>
+			<?php
+		}
+
+		/* Title */
+		if ( is_archive() ) {
+			$page_title = get_the_archive_title();
+		}
+		else {
+			$metaTitle = get_post_meta($post->ID, 'meta_title', true);
+			if ( $metaTitle ) {
+				$page_title = $metaTitle;
+			}
+			else {
+				$page_title = get_the_title();
+			}
+		}
 	?>
 
 	<meta charset="utf-8">
@@ -61,4 +87,20 @@
 	<?php wp_head(); ?>
 </head>
 
-<body id="body" <?php body_class(); ?>>
+<body id="body">
+	
+	<?php
+
+		/* Add Google Tag Manager code */
+		if ($googleTagManager) {
+			?>
+				<noscript>
+					<iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $googleTagManager ?>" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+				</noscript>
+			<?php
+		}
+
+		include("template-parts/navigation.php");	
+	?>
+
+<div class="page-content relative">
