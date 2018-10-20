@@ -27,10 +27,6 @@ $frontbox_required = array(
 	'shortcodes/phone-number',
 	// Meta boxes
 	'meta_box/js_upload_media',
-	'meta_box/description',
-	'meta_box/keywords',
-	// 'meta_box/meta_subtitle',
-	'meta_box/title',
 	// 'meta_box/page_button',
 	// 'meta_box/class',
 	'user_profile',
@@ -40,6 +36,10 @@ $frontbox_required = array(
 	// 'post_types',
 	// Settings
 	'settings/_concat',
+
+	'meta_box/SEO',
+	'meta_box/SEO_archive-match',
+	'meta_box/SEO_archive-keywords',
 );
 
 frontbox_required($frontbox_required);

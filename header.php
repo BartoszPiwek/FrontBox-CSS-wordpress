@@ -6,29 +6,7 @@
 		global $version;
 		$post_id = $post->ID;
 		$googleTagManager = get_option('google-tag-manager');
-
-		if (has_post_thumbnail() && !is_front_page() &&!is_home()) {
-			$thumb_id = get_post_thumbnail_id();
-			$page_image = wp_get_attachment_image_src( $thumb_id,'og-image', true )[0];
-		} else {
-			$custom_logo_id = get_theme_mod( 'custom_logo' );
-			$page_image = wp_get_attachment_image_src( $custom_logo_id , 'og-image', true )[0];
-		}
-		if (is_home() || is_front_page() ) {
-			$page_description = get_bloginfo("description");
-		} else {
-			if (has_excerpt($post_id)) {
-				$page_description = get_the_excerpt($post_id);
-			} else {
-				$page_description = get_post_meta($post_id, "meta_description", true);
-			}
-		}
-
-		$page_keywords = get_post_meta($post_id, "meta_keywords", true);
-	?>
-
-	<?php
-
+	
 		/* Add Google Tag Manager code */
 		if ($googleTagManager) {
 			?>
@@ -37,19 +15,48 @@
 				</script>
 			<?php
 		}
-
-		/* Title */
+	
 		if ( is_archive() ) {
-			$page_title = get_the_archive_title();
+			$archive_title = get_the_archive_title();
+			$found_page = null;
+		
+			$found_page = get_posts( array( 
+				'post_type' => 'seo-archive',
+				'posts_per_page' => 1,
+				'meta_key' => 'seo_archive_match',
+				'meta_value' => $archive_title,
+			));
+		
+			if ($found_page[0]) {
+				$page_description = $found_page[0]->post_content;
+				$page_title = $found_page[0]->post_title;
+				$page_keywords = get_post_meta( $found_page[0]->ID, 'seo_archive_keywords', true );
+			
+				$thumb_id = get_post_thumbnail_id($found_page[0]);
+				$page_image = wp_get_attachment_image_src( $thumb_id,'og-image', true )[0];
+			}
+			else {
+				$page_title = $archive_title;
+			}
 		}
 		else {
-			$metaTitle = get_post_meta($post->ID, 'meta_title', true);
+			$metaTitle = get_post_meta($post->ID, 'seoTitle', true);
+			$metaDescription = get_post_meta($post->ID, 'seoDescription', true);
+			$metaKeywords = get_post_meta($post->ID, 'seoKeywords', true);
+		
+			$custom_logo_id = get_theme_mod( 'custom_logo' );
+			$page_image = wp_get_attachment_image_src( $custom_logo_id , 'og-image', true )[0];
 			if ( $metaTitle ) {
 				$page_title = $metaTitle;
+				$page_description = $metaDescription;
+				$page_keywords = $metaKeywords;
 			}
 			else {
 				$page_title = get_the_title();
+				$page_description = $metaDescription;
+				$page_keywords = $metaKeywords;
 			}
+			
 		}
 	?>
 
