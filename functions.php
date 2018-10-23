@@ -11,11 +11,10 @@
 
 
 /*==================================================
-// Switch prod/dev wordpress version
+// Global variables
 ==================================================*/
-
-global $version;
-$version = get_option('version');
+$GLOBALS['debugger'] = get_option('debugger');
+$GLOBALS['version'] = get_option('version');
 
 /*==================================================
 // Include files
@@ -36,26 +35,13 @@ $frontbox_required = array(
 	// 'post_types',
 	// Settings
 	'settings/_concat',
-
+	/* SEO */
 	'meta_box/SEO',
 	'meta_box/SEO_archive-match',
 	'meta_box/SEO_archive-keywords',
 );
 
 frontbox_required($frontbox_required);
-
-/**
- * Libs
- */
-
-$frontbox_required = array(
-	// Website screenshot tool based on PHP and PhantomJS
-	'screen-master/autoload',
-);
-
-frontbox_required($frontbox_required, '/libs');
-
-use Screen\Capture;
 
 /*==================================================
 // Include scripts/style in wordpress theme 
@@ -284,29 +270,6 @@ function html_widget_title( $var) {
 add_filter( 'widget_title', 'html_widget_title' );
 
 /**
- * Hide the Archive Title Prefix in WordPress
- */
-function hap_hide_the_archive_title( $title ) {
-	if ( is_rtl() ) {
-		return $title;
-	}
-	$title_parts = explode( ': ', $title, 2 );
-	if ( ! empty( $title_parts[1] ) ) {
-		$title = wp_kses(
-			$title_parts[1],
-			array(
-				'span' => array(
-					'class' => array(),
-				),
-			)
-		);
-		// $title = '<span class="screen-reader-text">' . esc_html( $title_parts[0] ) . ': </span>' . $title;
-	}
-	return $title;
-}
-add_filter( 'get_the_archive_title', 'hap_hide_the_archive_title' );
-
-/**
  * Run shortcodes in widgets
  */
 add_filter( 'widget_text', 'do_shortcode' );
@@ -314,10 +277,10 @@ add_filter( 'widget_text', 'do_shortcode' );
 /**
  * Add admin style
  */
-function frontbox_admin_css() {
-	echo '<style>' . file_get_contents( get_template_directory_uri() . '/assets/css/css_admin.css') . '</style>';
-}
-add_action('admin_head', 'frontbox_admin_css');
+// function frontbox_admin_css() {
+// 	echo '<style>' . file_get_contents( get_template_directory_uri() . '/assets/css/css_admin.css') . '</style>';
+// }
+// add_action('admin_head', 'frontbox_admin_css');
 
 /*==================================================
 // Add theme support
@@ -338,6 +301,22 @@ add_theme_support( 'post-thumbnails' );
 /*==================================================
 // Addon functions
 ==================================================*/
+
+function startsWith($haystack, $needle)
+{
+     $length = strlen($needle);
+     return (substr($haystack, 0, $length) === $needle);
+}
+
+function endsWith($haystack, $needle)
+{
+    $length = strlen($needle);
+    if ($length == 0) {
+        return true;
+    }
+
+    return (substr($haystack, -$length) === $needle);
+}
 
 /**
  * Return user avatar url
@@ -367,6 +346,14 @@ function frontbox_required($array, $prefix = false) {
 		require($theme_url . '/' .  $prefix_pass . $value . '.php');
 	}
 }
+
+/**
+ * Optional required libs
+ */
+if (file_exists( __DIR__ . "/vendor/autoload.php" )) {
+	require( __DIR__ . "/vendor/autoload.php" );
+}
+use Screen\Capture;
 
 /*==================================================
 // AJAX
@@ -404,5 +391,43 @@ class frontbox_ajax_screenshot {
         }
     }
 $ajaxForm = new frontbox_ajax_screenshot();
+
+/**
+ * UTM Switcher
+ */
+function frontbox_utm_switcher($name) {
+	
+	/* Grab variable from URL */
+	$url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    $query_str = parse_url($url, PHP_URL_QUERY);
+	parse_str($query_str, $query_params);
+	/* Check saved cookies */
+	$cookie_saved = $_COOKIE['utm_switcher_' . $name];
+	/* Get custom value options */
+	$settings = get_option('frontbox_settings_utm_switcher_' . $name);
+
+	/* Return custom value */
+	if ($query_params['utm_medium'] || $cookie_saved) {
+	
+		$cookie_value = $query_params['utm_medium'];
+		if (!$cookie_value) {
+			$cookie_value = $cookie_saved;
+		}
+
+		foreach ($settings as $key=>$value) {
+
+			if ('utm_switcher_' . $cookie_value == 'utm_switcher_' . $key) {
+				/* Save cookies */
+				if (!$cookie_saved || $cookie_saved != 'utm_switcher_' . $key) {
+					setcookie('utm_switcher_' .$name, $cookie_value, time() + (86400 * 30), "/"); // 86400 = 1 day
+				}
+				return $value;
+			}
+		}
+	}
+	/* Default value */
+	return reset($settings);
+
+}
 
 ?>
