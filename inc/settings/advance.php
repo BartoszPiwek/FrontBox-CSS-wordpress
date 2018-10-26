@@ -1,15 +1,15 @@
 <?php
 
-function frontbox_settings_advance_content() { ?>
+function frontbox_settings_advanced_content() { ?>
 
 	<div class="wrap frontbox">
 
-		<h2 class="title">ADVANVCE</h2>
+		<h2 class="title">Advanced</h2>
 
 		<form method="post" class="frontbox-form" action="options.php">
 		
-			<?php settings_fields( 'frontbox_settings' ); ?>
-			<?php do_settings_sections( 'frontbox_settings' ); ?>
+			<?php settings_fields( 'frontbox_settings_advanced' ); ?>
+			<?php do_settings_sections( 'frontbox_settings_advanced' ); ?>
 
 			<table class="form-table">
 
@@ -25,9 +25,23 @@ function frontbox_settings_advance_content() { ?>
 
 							<br>
 
+							<label for="debugger">
+								<input type="checkbox" id="debugger" name="debugger" value="true" <?php if(get_option('debugger') == "true") { echo "checked"; } ?> />
+									Debugger
+							</label>
+
+							<br>
+
 							<label for="admin-bar">
 								<input type="checkbox" id="admin-bar" name="admin-bar" value="true" <?php if(get_option('admin-bar') == "true") { echo "checked"; } ?> />
 									Show admin bar
+							</label>
+
+							<br>
+
+							<label for="comments">
+								<input type="checkbox" id="comments" name="comments" value="true" <?php if(get_option('comments') == "true") { echo "checked"; } ?> />
+									Remove comments
 							</label>
 
 						</fieldset>
@@ -41,14 +55,12 @@ function frontbox_settings_advance_content() { ?>
 	
 							<a class="button button-primary" id="take-screenshot">Take</a>
 
-							<script>
+							<script>				
 								jQuery("#take-screenshot").click(function() {							
 									jQuery.post( '<?php echo admin_url( 'admin-ajax.php') ?>' , {
 										action: 'frontbox_screnshot',
-									}, function(msg) {
-										window.setTimeout(function() {
-											alert(msg);
-										}, 1000);
+									}, function(output, status) {
+										alert(status);
 									});
 								});
 							</script>
@@ -58,7 +70,6 @@ function frontbox_settings_advance_content() { ?>
 				</tr>
 
 			</table>
-
 			
 			<?php submit_button(); ?>
 

@@ -39,6 +39,8 @@ $frontbox_required = array(
 	'meta_box/SEO',
 	'meta_box/SEO_archive-match',
 	'meta_box/SEO_archive-keywords',
+	/* DEV */
+	'dev',
 );
 
 frontbox_required($frontbox_required);
@@ -199,6 +201,12 @@ add_filter('tiny_mce_before_init', 'frontbox_wysiwyg_add');
 /*==================================================
 // Remove from default wordpress flow
 ==================================================*/
+
+// Disable wp-embed
+function my_deregister_scripts(){
+	wp_deregister_script( 'wp-embed' );
+  }
+  add_action( 'wp_footer', 'my_deregister_scripts' );
 
 // Disable emoji's
 remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
