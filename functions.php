@@ -185,19 +185,6 @@ function after_the_content($content) {
 }
 add_filter('the_content',  'after_the_content');
 
-// Add to WYSIWYG { required TinyMCE Advanced }
-function frontbox_wysiwyg_add($init) {
-	// Colors
-	$customColors = '
-        "e60012", "Red",
-	';
-	
-    $init['textcolor_map'] = '['.$custom_colors.']';
-	$init['textcolor_rows'] = 1;
-    return $init;
-}
-add_filter('tiny_mce_before_init', 'frontbox_wysiwyg_add');
-
 /*==================================================
 // Remove from default wordpress flow
 ==================================================*/
