@@ -9,12 +9,6 @@
 
                 jQuery.fn.upload_listing_image = function( button ) {
 
-                    // If the media frame already exists, reopen it.
-                    if ( file_frame ) {
-                    file_frame.open();
-                    return;
-                    }
-
                     // Create the media frame.
                     file_frame = wp.media.frames.file_frame = wp.media({
                     title: jQuery( this ).data( 'uploader_title' ),
